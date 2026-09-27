@@ -1,8 +1,6 @@
 package com.ferra13671.overtone.impl;
 
-import com.ferra13671.overtone.api.AudioContext;
-import com.ferra13671.overtone.api.AudioDevice;
-import lombok.AccessLevel;
+import com.ferra13671.overtone.api.Scene;
 import lombok.Getter;
 import org.lwjgl.openal.ALC;
 import org.lwjgl.openal.ALC10;
@@ -10,19 +8,19 @@ import org.lwjgl.openal.ALCCapabilities;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-final class ALDevice implements AudioDevice {
-    @Getter(AccessLevel.PACKAGE)
+//TODO resource tracking
+final class ALDevice {
+    @Getter
     private final ALBackend backend;
-    @Getter(AccessLevel.PACKAGE)
+    @Getter
     private final long handle;
     @Getter
     private final ALCCapabilities capabilities;
-    @Getter(AccessLevel.PACKAGE)
-    private final Set<AudioContext> contexts = new HashSet<>();
+    @Getter
+    private final Set<Scene> scenes = new HashSet<>();
 
     public ALDevice(String name, ALBackend backend) {
         this.backend = backend;
@@ -40,18 +38,8 @@ final class ALDevice implements AudioDevice {
         }
     }
 
-    @Override
-    public Set<AudioContext> getAllContexts() {
-        return Collections.unmodifiableSet(this.contexts);
-    }
-
-    @Override
-    public AudioContext createContext() {
-        return new ALContext(this);
-    }
-
     public void close() {
-        for (AudioContext context : Set.copyOf(getContexts()))
+        for (Scene context : Set.copyOf(getScenes()))
             context.close();
 
         ALC10.alcCloseDevice(this.handle);

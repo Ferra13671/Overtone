@@ -1,6 +1,8 @@
 package com.ferra13671.overtone.api;
 
-public interface SoundSource extends AutoCloseable {
+import com.ferra13671.overtone.HandleableInt;
+
+public interface SoundSource extends AutoCloseable, HandleableInt {
 
     void play();
 
@@ -11,6 +13,8 @@ public interface SoundSource extends AutoCloseable {
     void rewind();
 
     boolean isPlaying();
+
+    void awaitPlaybackCompletion();
 
     void setBuffer(SoundBuffer soundBuffer);
 

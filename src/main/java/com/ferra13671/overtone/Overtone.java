@@ -1,9 +1,9 @@
 package com.ferra13671.overtone;
 
-import com.ferra13671.overtone.api.AudioBackend;
+import com.ferra13671.overtone.api.Backend;
 import com.ferra13671.overtone.api.SoundBuffer;
 import com.ferra13671.overtone.api.SoundFormat;
-import com.ferra13671.overtone.api.decoder.AudioDecoder;
+import com.ferra13671.overtone.api.decoder.Decoder;
 import com.ferra13671.overtone.api.decoder.DecodedAudio;
 import com.ferra13671.overtone.impl.ALBackend;
 import com.ferra13671.overtone.impl.decoder.OGGDecoder;
@@ -15,18 +15,17 @@ import java.io.InputStream;
 
 @UtilityClass
 public class Overtone {
-    public static final AudioDecoder OGG_DECODER = new OGGDecoder();
-    public static final AudioDecoder WAV_DECODER = new WAVDecoder();
+    public static final Decoder OGG_DECODER = new OGGDecoder();
+    public static final Decoder WAV_DECODER = new WAVDecoder();
 
     @Getter
-    private AudioBackend backend;
+    private Backend backend;
 
     public void init() {
         backend = new ALBackend();
-        backend.getDevice().createContext().makeCurrent();
     }
 
-    public SoundBuffer createSoundBuffer(AudioDecoder decoder, InputStream inputStream) {
+    public SoundBuffer createSoundBuffer(Decoder decoder, InputStream inputStream) {
         SoundBuffer soundBuffer = getBackend().createBuffer();
 
         try(DecodedAudio decodedAudio = decoder.decode(inputStream)) {

@@ -1,6 +1,6 @@
 package com.ferra13671.overtone.impl.decoder;
 
-import com.ferra13671.overtone.api.decoder.AudioDecoder;
+import com.ferra13671.overtone.api.decoder.Decoder;
 import com.ferra13671.overtone.api.decoder.DecodedAudio;
 import org.lwjgl.stb.STBVorbis;
 import org.lwjgl.stb.STBVorbisInfo;
@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-public class OGGDecoder implements AudioDecoder {
+public class OGGDecoder implements Decoder {
 
     @Override
     public DecodedAudio decode(InputStream inputStream) throws Exception {

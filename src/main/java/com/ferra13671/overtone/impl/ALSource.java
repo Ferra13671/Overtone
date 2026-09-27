@@ -2,62 +2,87 @@ package com.ferra13671.overtone.impl;
 
 import com.ferra13671.overtone.api.SoundBuffer;
 import com.ferra13671.overtone.api.SoundSource;
+import lombok.Getter;
 import org.lwjgl.openal.AL11;
 
 final class ALSource implements SoundSource {
-    private final int id;
+    private final ALScene scene;
+    private final ALBackend backend;
+    @Getter
+    private final int handle;
 
-    public ALSource() {
-        this.id = AL11.alGenSources();
+    public ALSource(ALScene scene, ALBackend backend) {
+        this.scene = scene;
+        this.backend = backend;
+
+        backend.ensureScene(scene);
+        this.handle = AL11.alGenSources();
     }
 
     @Override
     public void play() {
-        AL11.alSourcePlay(this.id);
+        this.backend.ensureScene(this.scene);
+        AL11.alSourcePlay(getHandle());
     }
 
     @Override
     public void pause() {
-        AL11.alSourcePause(this.id);
+        this.backend.ensureScene(this.scene);
+        AL11.alSourcePause(getHandle());
     }
 
     @Override
     public void stop() {
-        AL11.alSourceStop(this.id);
+        this.backend.ensureScene(this.scene);
+        AL11.alSourceStop(getHandle());
     }
 
     @Override
     public void rewind() {
-        AL11.alSourceRewind(this.id);
+        this.backend.ensureScene(this.scene);
+        AL11.alSourceRewind(getHandle());
     }
 
     @Override
     public boolean isPlaying() {
-        return AL11.alGetSourcei(this.id, AL11.AL_SOURCE_STATE) == AL11.AL_PLAYING;
+        this.backend.ensureScene(this.scene);
+        return AL11.alGetSourcei(getHandle(), AL11.AL_SOURCE_STATE) == AL11.AL_PLAYING;
+    }
+
+    @Override
+    public void awaitPlaybackCompletion() {
+        while (isPlaying()) {
+            Thread.onSpinWait();
+        }
     }
 
     @Override
     public void setBuffer(SoundBuffer buffer) {
-        AL11.alSourcei(this.id, AL11.AL_BUFFER, ((ALBuffer) buffer).getHandler());
+        this.backend.ensureScene(this.scene);
+        AL11.alSourcei(getHandle(), AL11.AL_BUFFER, buffer.getHandle());
     }
 
     @Override
     public void setGain(float gain) {
-        AL11.alSourcef(this.id, AL11.AL_GAIN, gain);
+        this.backend.ensureScene(this.scene);
+        AL11.alSourcef(getHandle(), AL11.AL_GAIN, gain);
     }
 
     @Override
     public void setPitch(float pitch) {
-        AL11.alSourcef(this.id, AL11.AL_PITCH, pitch);
+        this.backend.ensureScene(this.scene);
+        AL11.alSourcef(getHandle(), AL11.AL_PITCH, pitch);
     }
 
     @Override
     public void setLooping(boolean looping) {
-        AL11.alSourcei(this.id, AL11.AL_LOOPING, looping ? AL11.AL_TRUE : AL11.AL_FALSE);
+        this.backend.ensureScene(this.scene);
+        AL11.alSourcei(getHandle(), AL11.AL_LOOPING, looping ? AL11.AL_TRUE : AL11.AL_FALSE);
     }
 
     @Override
     public void close() {
-        AL11.alDeleteSources(this.id);
+        this.backend.ensureScene(this.scene);
+        AL11.alDeleteSources(getHandle());
     }
 }

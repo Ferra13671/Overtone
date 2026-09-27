@@ -1,6 +1,6 @@
 package com.ferra13671.overtone.impl.decoder;
 
-import com.ferra13671.overtone.api.decoder.AudioDecoder;
+import com.ferra13671.overtone.api.decoder.Decoder;
 import com.ferra13671.overtone.api.decoder.DecodedAudio;
 import org.lwjgl.system.MemoryUtil;
 
@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class WAVDecoder implements AudioDecoder {
+public class WAVDecoder implements Decoder {
 
     @Override
     public DecodedAudio decode(InputStream inputStream) throws Exception {
