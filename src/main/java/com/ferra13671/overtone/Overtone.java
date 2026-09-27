@@ -12,11 +12,14 @@ import lombok.Getter;
 import lombok.experimental.UtilityClass;
 
 import java.io.InputStream;
+import java.nio.ShortBuffer;
 
 @UtilityClass
 public class Overtone {
-    public static final Decoder OGG_DECODER = new OGGDecoder();
-    public static final Decoder WAV_DECODER = new WAVDecoder();
+    public final int DEFAULT_SAMPLE_RATE = 44100;
+
+    public final Decoder OGG_DECODER = new OGGDecoder();
+    public final Decoder WAV_DECODER = new WAVDecoder();
 
     @Getter
     private Backend backend;
@@ -37,6 +40,18 @@ public class Overtone {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return soundBuffer;
+    }
+
+    public SoundBuffer createSoundBuffer(ShortBuffer pcm, SoundFormat format, int sampleRate) {
+        SoundBuffer soundBuffer = getBackend().createBuffer();
+
+        soundBuffer.uploadData(
+                format,
+                pcm,
+                sampleRate
+        );
 
         return soundBuffer;
     }

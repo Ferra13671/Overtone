@@ -14,13 +14,18 @@ final class ALScene implements Scene {
     private final ALBackend backend;
     @Getter
     private final long handle;
+    @Getter
+    private final ALListener listener;
     private ALCapabilities capabilities;
 
     public ALScene(ALDevice device, ALBackend backend) {
         this.device = device;
         this.backend = backend;
+
         this.handle = ALC10.alcCreateContext(device.getHandle(), (IntBuffer) null);
         backend.getScenes().add(this);
+
+        this.listener = new ALListener(this, backend);
     }
 
     @Override
@@ -51,6 +56,7 @@ final class ALScene implements Scene {
 
     @Override
     public void close() {
+        this.listener.close();
         ALC10.alcDestroyContext(getHandle());
         this.backend.getScenes().remove(this);
     }
