@@ -18,9 +18,15 @@ public interface SoundSource extends AutoCloseable, HandleableInt {
 
     void setBuffer(SoundBuffer soundBuffer);
 
-    void setGain(float gain);
+    float getVolume();
+
+    void setVolume(float volume);
+
+    float getPitch();
 
     void setPitch(float pitch);
+
+    boolean isLooping();
 
     void setLooping(boolean looping);
 

@@ -10,6 +10,13 @@ final class ALSource implements SoundSource {
     private final ALBackend backend;
     @Getter
     private final int handle;
+    private SoundBuffer buffer = null;
+    @Getter
+    private float volume = 1f;
+    @Getter
+    private float pitch = 1f;
+    @Getter
+    private boolean looping = false;
 
     public ALSource(ALScene scene, ALBackend backend) {
         this.scene = scene;
@@ -58,26 +65,42 @@ final class ALSource implements SoundSource {
 
     @Override
     public void setBuffer(SoundBuffer buffer) {
-        this.backend.ensureScene(this.scene);
-        AL11.alSourcei(getHandle(), AL11.AL_BUFFER, buffer.getHandle());
+        if (this.buffer != buffer) {
+            this.backend.ensureScene(this.scene);
+            AL11.alSourcei(getHandle(), AL11.AL_BUFFER, buffer.getHandle());
+
+            this.buffer = buffer;
+        }
     }
 
     @Override
-    public void setGain(float gain) {
-        this.backend.ensureScene(this.scene);
-        AL11.alSourcef(getHandle(), AL11.AL_GAIN, gain);
+    public void setVolume(float volume) {
+        if (this.volume != volume) {
+            this.backend.ensureScene(this.scene);
+            AL11.alSourcef(getHandle(), AL11.AL_GAIN, volume);
+
+            this.volume = volume;
+        }
     }
 
     @Override
     public void setPitch(float pitch) {
-        this.backend.ensureScene(this.scene);
-        AL11.alSourcef(getHandle(), AL11.AL_PITCH, pitch);
+        if (this.pitch != pitch) {
+            this.backend.ensureScene(this.scene);
+            AL11.alSourcef(getHandle(), AL11.AL_PITCH, pitch);
+
+            this.pitch = pitch;
+        }
     }
 
     @Override
     public void setLooping(boolean looping) {
-        this.backend.ensureScene(this.scene);
-        AL11.alSourcei(getHandle(), AL11.AL_LOOPING, looping ? AL11.AL_TRUE : AL11.AL_FALSE);
+        if (this.looping != looping) {
+            this.backend.ensureScene(this.scene);
+            AL11.alSourcei(getHandle(), AL11.AL_LOOPING, looping ? AL11.AL_TRUE : AL11.AL_FALSE);
+
+            this.looping = looping;
+        }
     }
 
     @Override
