@@ -1,4 +1,4 @@
-package com.ferra13671.overtone;
+package com.ferra13671.overtone.api;
 
 import lombok.AllArgsConstructor;
 import org.lwjgl.openal.AL11;
