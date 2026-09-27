@@ -1,8 +1,8 @@
 package com.ferra13671.overtone.impl;
 
 import com.ferra13671.overtone.api.AudioBackend;
-import com.ferra13671.overtone.api.AudioBuffer;
-import com.ferra13671.overtone.api.AudioSource;
+import com.ferra13671.overtone.api.SoundBuffer;
+import com.ferra13671.overtone.api.SoundSource;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,12 +19,12 @@ public final class ALBackend implements AudioBackend {
     }
 
     @Override
-    public AudioBuffer createBuffer() {
+    public SoundBuffer createBuffer() {
         return new ALBuffer();
     }
 
     @Override
-    public AudioSource createSource() {
+    public SoundSource createSource() {
         return new ALSource();
     }
 

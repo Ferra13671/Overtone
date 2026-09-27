@@ -1,6 +1,6 @@
 import com.ferra13671.overtone.Overtone;
-import com.ferra13671.overtone.api.AudioBuffer;
-import com.ferra13671.overtone.api.AudioSource;
+import com.ferra13671.overtone.api.SoundBuffer;
+import com.ferra13671.overtone.api.SoundSource;
 import lombok.experimental.UtilityClass;
 
 import java.io.InputStream;
@@ -13,8 +13,8 @@ public class Main {
         Overtone.getBackend().getDevice().createContext().makeCurrent();
 
         try(InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("a.ogg")) {
-            AudioBuffer buffer = Overtone.createSoundBuffer(Overtone.OGG_DECODER, inputStream);
-            AudioSource source = Overtone.getBackend().createSource();
+            SoundBuffer buffer = Overtone.createSoundBuffer(Overtone.OGG_DECODER, inputStream);
+            SoundSource source = Overtone.getBackend().createSource();
 
             source.setBuffer(buffer);
             source.play();

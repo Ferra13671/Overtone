@@ -2,7 +2,7 @@ package com.ferra13671.overtone.api;
 
 import java.nio.ShortBuffer;
 
-public interface AudioBuffer extends AutoCloseable {
+public interface SoundBuffer extends AutoCloseable {
 
     void uploadData(SoundFormat soundFormat, ShortBuffer pcm, int sampleRate);
 

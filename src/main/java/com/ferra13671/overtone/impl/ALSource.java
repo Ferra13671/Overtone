@@ -1,10 +1,10 @@
 package com.ferra13671.overtone.impl;
 
-import com.ferra13671.overtone.api.AudioBuffer;
-import com.ferra13671.overtone.api.AudioSource;
+import com.ferra13671.overtone.api.SoundBuffer;
+import com.ferra13671.overtone.api.SoundSource;
 import org.lwjgl.openal.AL11;
 
-final class ALSource implements AudioSource {
+final class ALSource implements SoundSource {
     private final int id;
 
     public ALSource() {
@@ -37,7 +37,7 @@ final class ALSource implements AudioSource {
     }
 
     @Override
-    public void setBuffer(AudioBuffer buffer) {
+    public void setBuffer(SoundBuffer buffer) {
         AL11.alSourcei(this.id, AL11.AL_BUFFER, ((ALBuffer) buffer).getHandler());
     }
 

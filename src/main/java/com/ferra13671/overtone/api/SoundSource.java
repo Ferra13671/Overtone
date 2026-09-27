@@ -1,6 +1,6 @@
 package com.ferra13671.overtone.api;
 
-public interface AudioSource extends AutoCloseable {
+public interface SoundSource extends AutoCloseable {
 
     void play();
 
@@ -12,7 +12,7 @@ public interface AudioSource extends AutoCloseable {
 
     boolean isPlaying();
 
-    void setBuffer(AudioBuffer audioBuffer);
+    void setBuffer(SoundBuffer soundBuffer);
 
     void setGain(float gain);
 

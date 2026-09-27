@@ -6,9 +6,9 @@ public interface AudioBackend {
 
     AudioContext getCurrentContext();
 
-    AudioBuffer createBuffer();
+    SoundBuffer createBuffer();
 
-    AudioSource createSource();
+    SoundSource createSource();
 
     void close();
 }

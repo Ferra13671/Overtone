@@ -1,6 +1,6 @@
 package com.ferra13671.overtone.impl;
 
-import com.ferra13671.overtone.api.AudioBuffer;
+import com.ferra13671.overtone.api.SoundBuffer;
 import com.ferra13671.overtone.api.SoundFormat;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import org.lwjgl.openal.AL11;
 
 import java.nio.ShortBuffer;
 
-final class ALBuffer implements AudioBuffer {
+final class ALBuffer implements SoundBuffer {
     @Getter(AccessLevel.PACKAGE)
     private final int handler;
 

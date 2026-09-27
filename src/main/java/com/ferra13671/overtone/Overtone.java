@@ -1,7 +1,7 @@
 package com.ferra13671.overtone;
 
 import com.ferra13671.overtone.api.AudioBackend;
-import com.ferra13671.overtone.api.AudioBuffer;
+import com.ferra13671.overtone.api.SoundBuffer;
 import com.ferra13671.overtone.api.SoundFormat;
 import com.ferra13671.overtone.api.decoder.AudioDecoder;
 import com.ferra13671.overtone.api.decoder.DecodedAudio;
@@ -26,11 +26,11 @@ public class Overtone {
         backend.getDevice().createContext().makeCurrent();
     }
 
-    public AudioBuffer createSoundBuffer(AudioDecoder decoder, InputStream inputStream) {
-        AudioBuffer audioBuffer = getBackend().createBuffer();
+    public SoundBuffer createSoundBuffer(AudioDecoder decoder, InputStream inputStream) {
+        SoundBuffer soundBuffer = getBackend().createBuffer();
 
         try(DecodedAudio decodedAudio = decoder.decode(inputStream)) {
-            audioBuffer.uploadData(
+            soundBuffer.uploadData(
                     SoundFormat.forChannels(decodedAudio.channels()),
                     decodedAudio.pcm(),
                     decodedAudio.sampleRate()
@@ -39,7 +39,7 @@ public class Overtone {
             e.printStackTrace();
         }
 
-        return audioBuffer;
+        return soundBuffer;
     }
 
     public void close() {
