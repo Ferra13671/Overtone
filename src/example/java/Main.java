@@ -14,7 +14,7 @@ public class Main {
 
         try {
             SoundBuffer buffer = Overtone.createSoundBuffer(
-                    PCMGenerator.generateWhiteNoise(3000, Overtone.DEFAULT_SAMPLE_RATE),
+                    PCMGenerator.brownNoise(3000, Overtone.DEFAULT_SAMPLE_RATE),
                     SoundFormat.Mono,
                     Overtone.DEFAULT_SAMPLE_RATE
             );
@@ -22,11 +22,12 @@ public class Main {
             try(SoundSource source = Overtone.getBackend().getActiveScene().createSource()) {
                 source.setBuffer(buffer);
                 source.setVolume(0.1f);
+                source.setLooping(true);
                 source.play();
 
-                Overtone.getBackend().getActiveScene().getListener().setPosition(new Vector3f(
-                        -5f, 0f, 0f
-                ));
+                //Overtone.getBackend().getActiveScene().getListener().setPosition(new Vector3f(
+                //        -5f, 0f, 0f
+                //));
 
                 source.awaitPlaybackCompletion();
             }
