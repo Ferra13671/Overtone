@@ -1,6 +1,6 @@
 package com.ferra13671.overtone.impl;
 
-import com.ferra13671.overtone.api.Listener;
+import com.ferra13671.overtone.api.Spatial;
 import lombok.Getter;
 import org.joml.Vector3f;
 import org.lwjgl.openal.AL11;
@@ -8,7 +8,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 
-final class ALListener implements Listener {
+final class ALListener implements Spatial {
     private final ALScene scene;
     private final ALBackend backend;
 
@@ -22,11 +22,13 @@ final class ALListener implements Listener {
     @Getter
     private float yaw = 0f;
     @Getter
-    private float pitch = 0f;
+    private float elevation = 0f;
     @Getter
     private float roll = 0f;
 
+    @Getter
     private final Vector3f lookVector = new Vector3f(0f, 0f, -1f);
+    @Getter
     private final Vector3f upVector = new Vector3f(0f, 1f, 0f);
     private final FloatBuffer cacheBuffer = MemoryUtil.memAllocFloat(6);
 
@@ -57,19 +59,19 @@ final class ALListener implements Listener {
     }
 
     @Override
-    public void setRotation(float yaw, float pitch) {
-        setRotation(yaw, pitch, getRoll());
+    public void setRotation(float yaw, float elevation) {
+        setRotation(yaw, elevation, getRoll());
     }
 
     @Override
-    public void setRotation(float yaw, float pitch, float roll) {
+    public void setRotation(float yaw, float elevation, float roll) {
         if (
                 this.yaw != yaw ||
-                this.pitch != pitch ||
+                this.elevation != elevation ||
                 this.roll != roll
         ) {
             this.yaw = yaw;
-            this.pitch = pitch;
+            this.elevation = elevation;
             this.roll = roll;
 
             recalculateRotation();
@@ -81,8 +83,8 @@ final class ALListener implements Listener {
     }
 
     private void recalculateRotation() {
-        float cosPitch = (float) Math.cos(getPitch());
-        float sinPitch = (float) Math.sin(getPitch());
+        float cosPitch = (float) Math.cos(this.getElevation());
+        float sinPitch = (float) Math.sin(this.getElevation());
         float cosYaw   = (float) Math.cos(getYaw());
         float sinYaw   = (float) Math.sin(getYaw());
 

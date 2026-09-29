@@ -4,7 +4,6 @@ import com.ferra13671.overtone.api.SoundBuffer;
 import com.ferra13671.overtone.api.SoundFormat;
 import com.ferra13671.overtone.api.SoundSource;
 import lombok.experimental.UtilityClass;
-import org.joml.Vector3f;
 
 @UtilityClass
 public class Main {

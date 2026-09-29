@@ -5,7 +5,7 @@ import org.lwjgl.openal.ALCapabilities;
 
 public interface Scene extends HandleableLong {
 
-    Listener getListener();
+    Spatial getListener();
 
     void suspend();
 

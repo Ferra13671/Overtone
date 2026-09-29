@@ -2,7 +2,7 @@ package com.ferra13671.overtone.api;
 
 import com.ferra13671.overtone.HandleableInt;
 
-public interface SoundSource extends AutoCloseable, HandleableInt {
+public interface SoundSource extends AutoCloseable, HandleableInt, Spatial {
 
     void play();
 
