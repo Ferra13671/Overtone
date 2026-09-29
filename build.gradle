@@ -65,3 +65,22 @@ dependencies {
     exampleCompileOnly("org.projectlombok:lombok:${project.lombok_version}")
     exampleAnnotationProcessor("org.projectlombok:lombok:${project.lombok_version}")
 }
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.ferra13671'
+            artifactId = name
+            artifact source: jar.archiveFile, classifier: null
+            artifact sourcesJar
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
