@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.ferra13671'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 
 def osName = providers.systemProperty("os.name").get().toLowerCase()
 def osArch = providers.systemProperty("os.arch").get().toLowerCase()
@@ -74,7 +74,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId = 'com.ferra13671'
-            artifactId = name
+            artifactId = "overtone"
             artifact source: jar.archiveFile, classifier: null
             artifact sourcesJar
         }
