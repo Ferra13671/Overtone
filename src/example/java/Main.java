@@ -1,8 +1,4 @@
-import com.ferra13671.overtone.Overtone;
-import com.ferra13671.overtone.PCMGenerator;
-import com.ferra13671.overtone.api.SoundBuffer;
-import com.ferra13671.overtone.api.SoundFormat;
-import com.ferra13671.overtone.api.SoundSource;
+import com.ferra13671.overtone.*;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -12,28 +8,33 @@ public class Main {
         Overtone.init();
 
         try {
-            SoundBuffer buffer = Overtone.createSoundBuffer(
-                    PCMGenerator.brownNoise(3000, Overtone.DEFAULT_SAMPLE_RATE),
-                    SoundFormat.Mono,
-                    Overtone.DEFAULT_SAMPLE_RATE
-            );
+            SoundBuffer buffer = Overtone.createBuffer(Overtone.OGG_DECODER, Main.class.getClassLoader().getResourceAsStream("a.ogg"));
 
-            try(SoundSource source = Overtone.getBackend().getActiveScene().createSource()) {
-                source.setBuffer(buffer);
+            try(SoundSource source = Overtone.createSource()) {
+                source.setSoundBuffer(buffer);
                 source.setVolume(0.1f);
                 source.setLooping(true);
                 source.play();
 
+                do {
+                    loop(source);
+                } while (source.getState() == SoundState.Playing);
+
                 //Overtone.getBackend().getActiveScene().getListener().setPosition(new Vector3f(
                 //        -5f, 0f, 0f
                 //));
-
-                source.awaitPlaybackCompletion();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         Overtone.close();
+    }
+
+    //for tests
+    private void loop(SoundSource source) throws Exception {
+        Overtone.tick();
+
+        Thread.sleep(20);
     }
 }

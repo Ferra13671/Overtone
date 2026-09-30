@@ -1,4 +1,4 @@
-package com.ferra13671.overtone.api.decoder;
+package com.ferra13671.overtone.decoder;
 
 import org.lwjgl.system.MemoryUtil;
 

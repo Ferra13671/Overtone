@@ -1,14 +1,8 @@
-package com.ferra13671.overtone.api;
+package com.ferra13671.overtone;
 
-import lombok.AllArgsConstructor;
-import org.lwjgl.openal.AL11;
-
-@AllArgsConstructor
 public enum SoundFormat {
-    Mono(AL11.AL_FORMAT_MONO16),
-    Stereo(AL11.AL_FORMAT_STEREO16);
-
-    public final int id;
+    Mono,
+    Stereo;
 
     public static SoundFormat forChannels(int channels) {
         return switch (channels) {

@@ -1,6 +1,5 @@
-package com.ferra13671.overtone.impl;
+package com.ferra13671.overtone;
 
-import com.ferra13671.overtone.api.Scene;
 import lombok.Getter;
 import org.lwjgl.openal.ALC;
 import org.lwjgl.openal.ALC10;
@@ -8,22 +7,14 @@ import org.lwjgl.openal.ALCCapabilities;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Set;
 
-//TODO resource tracking
-final class ALDevice {
-    @Getter
-    private final ALBackend backend;
+public final class ALDevice {
     @Getter
     private final long handle;
     @Getter
     private final ALCCapabilities capabilities;
-    @Getter
-    private final Set<Scene> scenes = new HashSet<>();
 
-    public ALDevice(String name, ALBackend backend) {
-        this.backend = backend;
+    public ALDevice(String name) {
         ByteBuffer buffer = name != null ? MemoryUtil.memUTF8(name) : null;
 
         try {
@@ -39,9 +30,6 @@ final class ALDevice {
     }
 
     public void close() {
-        for (Scene context : Set.copyOf(getScenes()))
-            context.close();
-
         ALC10.alcCloseDevice(this.handle);
     }
 }

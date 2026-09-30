@@ -1,18 +1,19 @@
 package com.ferra13671.overtone;
 
-import com.ferra13671.overtone.api.Backend;
-import com.ferra13671.overtone.api.SoundBuffer;
-import com.ferra13671.overtone.api.SoundFormat;
-import com.ferra13671.overtone.api.decoder.Decoder;
-import com.ferra13671.overtone.api.decoder.DecodedAudio;
-import com.ferra13671.overtone.impl.ALBackend;
-import com.ferra13671.overtone.impl.decoder.OGGDecoder;
-import com.ferra13671.overtone.impl.decoder.WAVDecoder;
+import com.ferra13671.overtone.decoder.Decoder;
+import com.ferra13671.overtone.decoder.DecodedAudio;
+import com.ferra13671.overtone.decoder.OGGDecoder;
+import com.ferra13671.overtone.decoder.WAVDecoder;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
+import org.lwjgl.openal.ALC11;
+import org.lwjgl.openal.EXTDisconnect;
 
 import java.io.InputStream;
 import java.nio.ShortBuffer;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @UtilityClass
 public class Overtone {
@@ -21,18 +22,59 @@ public class Overtone {
     public final Decoder OGG_DECODER = new OGGDecoder();
     public final Decoder WAV_DECODER = new WAVDecoder();
 
+    private final List<SoundBuffer> buffers = new CopyOnWriteArrayList<>();
+    private final List<SoundSource> sources = new CopyOnWriteArrayList<>();
+
+    private volatile ALDevice device;
     @Getter
-    private Backend backend;
+    private volatile Backend backend;
 
     public void init() {
-        backend = new ALBackend();
+        if (backend != null)
+            throw new IllegalStateException("Overtone already initialized");
+
+        device = new ALDevice(null);
+        backend = new ALBackend(device);
     }
 
-    public SoundBuffer createSoundBuffer(Decoder decoder, InputStream inputStream) {
-        SoundBuffer soundBuffer = getBackend().createBuffer();
+    public void tick() {
+        if (isDeviceLost())
+            recreateDevice();
 
+        if (backend != null)
+            backend.tick();
+    }
+
+    private boolean isDeviceLost() {
+        return device.getCapabilities().ALC_EXT_disconnect && ALC11.alcGetInteger(device.getHandle(), EXTDisconnect.ALC_CONNECTED) == ALC11.ALC_FALSE;
+    }
+
+    private void recreateDevice() {
+        ALDevice prevDevice = device;
+        Backend prevBackend = backend;
+        device = null;
+        backend = null;
+        synchronized (prevDevice) {
+            synchronized (prevBackend) {
+                prevDevice.close();
+                prevBackend.close();
+                device = new ALDevice(null);
+                backend = new ALBackend(device);
+            }
+        }
+    }
+
+    public List<SoundBuffer> getBuffers() {
+        return Collections.unmodifiableList(buffers);
+    }
+
+    public List<SoundSource> getSources() {
+        return Collections.unmodifiableList(sources);
+    }
+
+    public SoundBuffer createBuffer(Decoder decoder, InputStream inputStream) {
         try(DecodedAudio decodedAudio = decoder.decode(inputStream)) {
-            soundBuffer.uploadData(
+            return createBuffer(
                     SoundFormat.forChannels(decodedAudio.channels()),
                     decodedAudio.pcm(),
                     decodedAudio.sampleRate()
@@ -41,22 +83,49 @@ public class Overtone {
             e.printStackTrace();
         }
 
+        return SoundBuffer.EMPTY;
+    }
+
+    public SoundBuffer createBuffer(SoundFormat format, ShortBuffer pcm, int sampleRate) {
+        SoundBuffer soundBuffer = new SoundBuffer(format, pcm, sampleRate);
+
+        buffers.add(soundBuffer);
+
         return soundBuffer;
     }
 
-    public SoundBuffer createSoundBuffer(ShortBuffer pcm, SoundFormat format, int sampleRate) {
-        SoundBuffer soundBuffer = getBackend().createBuffer();
+    public SoundSource createSource() {
+        SoundSource soundSource = new SoundSource();
 
-        soundBuffer.uploadData(
-                format,
-                pcm,
-                sampleRate
-        );
+        sources.add(soundSource);
 
-        return soundBuffer;
+        return soundSource;
+    }
+
+    void closeBuffer(SoundBuffer soundBuffer) {
+        if (buffers.contains(soundBuffer)) {
+            backend.onCloseBuffer(soundBuffer);
+            buffers.remove(soundBuffer);
+        }
+    }
+
+    void closeSource(SoundSource soundSource) {
+        if (sources.contains(soundSource)) {
+            backend.onCloseSource(soundSource);
+            sources.remove(soundSource);
+        }
     }
 
     public void close() {
+        if (backend == null)
+            return;
+
+        buffers.forEach(SoundBuffer::close);
+        sources.forEach(SoundSource::close);
+
         backend.close();
+        backend = null;
+        device.close();
+        device = null;
     }
 }

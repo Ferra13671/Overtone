@@ -1,7 +1,5 @@
-package com.ferra13671.overtone.impl.decoder;
+package com.ferra13671.overtone.decoder;
 
-import com.ferra13671.overtone.api.decoder.Decoder;
-import com.ferra13671.overtone.api.decoder.DecodedAudio;
 import org.lwjgl.stb.STBVorbis;
 import org.lwjgl.stb.STBVorbisInfo;
 import org.lwjgl.system.MemoryStack;
