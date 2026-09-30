@@ -7,7 +7,8 @@ import lombok.Setter;
 import java.util.Objects;
 
 @Getter
-public class SoundSource implements AutoCloseable {
+public sealed class SoundSource implements AutoCloseable
+        permits SpatialSoundSource {
     private SoundBuffer soundBuffer = null;
     private float volume = 1f;
     private float pitch = 1f;
@@ -15,6 +16,9 @@ public class SoundSource implements AutoCloseable {
     @Setter(AccessLevel.PACKAGE)
     private SoundState state = SoundState.Stopped;
 
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    private boolean dirty = true;
     @Getter(AccessLevel.PACKAGE)
     @Setter(AccessLevel.PACKAGE)
     private int backendHandle = -1;
@@ -51,24 +55,21 @@ public class SoundSource implements AutoCloseable {
     public void setVolume(float volume) {
         if (this.volume != volume) {
             this.volume = volume;
-
-            Overtone.getBackend().onChangeVolume(this);
+            setDirty(true);
         }
     }
 
     public void setPitch(float pitch) {
         if (this.pitch != pitch) {
             this.pitch = pitch;
-
-            Overtone.getBackend().onChangePitch(this);
+            setDirty(true);
         }
     }
 
     public void setLooping(boolean looping) {
         if (this.looping != looping) {
             this.looping = looping;
-
-            Overtone.getBackend().onChangeLooping(this);
+            setDirty(true);
         }
     }
 

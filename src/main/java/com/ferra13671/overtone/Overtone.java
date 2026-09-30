@@ -56,8 +56,8 @@ public class Overtone {
         backend = null;
         synchronized (prevDevice) {
             synchronized (prevBackend) {
-                prevDevice.close();
                 prevBackend.close();
+                prevDevice.close();
                 device = new ALDevice(null);
                 backend = new ALBackend(device);
             }
@@ -94,7 +94,15 @@ public class Overtone {
         return soundBuffer;
     }
 
-    public SoundSource createSource() {
+    public SpatialSoundSource create3DSource() {
+        SpatialSoundSource soundSource = new SpatialSoundSource();
+
+        sources.add(soundSource);
+
+        return soundSource;
+    }
+
+    public SoundSource create2DSource() {
         SoundSource soundSource = new SoundSource();
 
         sources.add(soundSource);
@@ -111,6 +119,7 @@ public class Overtone {
 
     void closeSource(SoundSource soundSource) {
         if (sources.contains(soundSource)) {
+            soundSource.setState(SoundState.Stopped);
             backend.onCloseSource(soundSource);
             sources.remove(soundSource);
         }

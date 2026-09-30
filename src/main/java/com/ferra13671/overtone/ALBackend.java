@@ -1,15 +1,17 @@
 package com.ferra13671.overtone;
 
+import org.joml.Vector3fc;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ALBackend implements Backend {
+public final class ALBackend implements Backend {
     private final long context;
     private final ALCapabilities contextCapabilities;
 
@@ -17,7 +19,9 @@ public class ALBackend implements Backend {
     private final List<SoundSource> allocatedSources = new CopyOnWriteArrayList<>();
     private final Set<Integer> activeBuffers = new HashSet<>();
 
-    public ALBackend(ALDevice device) {
+    private final FloatBuffer sourceRotationCacheBuffer = MemoryUtil.memAllocFloat(6);
+
+    ALBackend(ALDevice device) {
         this.context = ALC11.alcCreateContext(device.getHandle(), (IntBuffer) null);
         if (!ALC11.alcMakeContextCurrent(this.context))
             throw new IllegalStateException("Cannot make current context");
@@ -36,14 +40,46 @@ public class ALBackend implements Backend {
     @Override
     public void tick() {
         //TODO recreate the device if all sources stop within a single tick (provided there are more than 5)
-        synchronized (this.allocatedSources) {
-            for (SoundSource source : this.allocatedSources) {
-                if (source.getBackendHandle() != -1) {
-                    if (AL11.alGetSourcei(source.getBackendHandle(), AL11.AL_SOURCE_STATE) != AL11.AL_PLAYING)
-                        stopSource(source);
-                }
+        for (SoundSource source : this.allocatedSources) {
+            if (source.getBackendHandle() == -1) {
+                System.err.println("Synchronization error: allocated SoundSource not loaded into OpenAL!");
+                this.allocatedSources.remove(source);
+                continue;
             }
+
+            if (source.isDirty())
+                applySourceState(source);
+
+            if (AL11.alGetSourcei(source.getBackendHandle(), AL11.AL_SOURCE_STATE) != AL11.AL_PLAYING)
+                stopSource(source);
         }
+    }
+
+    private void applySourceState(SoundSource source) {
+        int handle = source.getBackendHandle();
+
+        AL11.alSourcef(handle, AL11.AL_GAIN, source.getVolume());
+        AL11.alSourcef(handle, AL11.AL_PITCH, source.getPitch());
+        AL11.alSourcei(handle, AL11.AL_LOOPING, source.isLooping() ? AL11.AL_TRUE : AL11.AL_FALSE);
+
+        if (source instanceof SpatialSoundSource sss) {
+            Vector3fc position = sss.getPosition();
+            Vector3fc lookVector = sss.getLookVector();
+            Vector3fc upVector = sss.getUpVector();
+
+            AL11.alSourcei(handle, AL11.AL_SOURCE_RELATIVE, AL11.AL_FALSE);
+            AL11.alSource3f(handle, AL11.AL_POSITION, position.x(), position.y(), position.z());
+
+            this.sourceRotationCacheBuffer
+               .put(0, lookVector.x()).put(1, lookVector.y()).put(2, lookVector.z())
+               .put(3, upVector.x()).put(4, upVector.y()).put(5, upVector.z());
+            AL11.alSourcefv(handle, AL11.AL_ORIENTATION, this.sourceRotationCacheBuffer);
+        } else {
+            AL11.alSourcei(handle, AL11.AL_SOURCE_RELATIVE, AL11.AL_TRUE);
+            AL11.alSource3f(handle, AL11.AL_POSITION, 0f, 0f, 0f);
+        }
+
+        source.setDirty(false);
     }
 
     @Override
@@ -64,9 +100,7 @@ public class ALBackend implements Backend {
         AL11.alSourcei(handle, AL11.AL_BUFFER, source.getSoundBuffer().getBackendHandle());
         if (source.getBackendSampleOffset() != 0)
             AL11.alSourcei(handle, AL11.AL_SAMPLE_OFFSET, source.getBackendSampleOffset());
-        AL11.alSourcef(handle, AL11.AL_GAIN, source.getVolume());
-        AL11.alSourcef(handle, AL11.AL_PITCH, source.getPitch());
-        AL11.alSourcei(handle, AL11.AL_LOOPING, source.isLooping() ? AL11.AL_TRUE : AL11.AL_FALSE);
+        applySourceState(source);
 
         source.setState(SoundState.Playing);
         AL11.alSourcePlay(handle);
@@ -74,15 +108,15 @@ public class ALBackend implements Backend {
 
     @Override
     public void pauseSource(SoundSource source) {
-        onCloseSource(source);
         source.setState(SoundState.Paused);
+        onCloseSource(source);
     }
 
     @Override
     public void stopSource(SoundSource source) {
-        onCloseSource(source);
         source.setBackendSampleOffset(0);
         source.setState(SoundState.Stopped);
+        onCloseSource(source);
     }
 
     @Override
@@ -96,24 +130,6 @@ public class ALBackend implements Backend {
     @Override
     public void onChangeBuffer(SoundSource source) {
         stopSource(source);
-    }
-
-    @Override
-    public void onChangeVolume(SoundSource source) {
-        if (this.allocatedSources.contains(source))
-            AL11.alSourcef(source.getBackendHandle(), AL11.AL_GAIN, source.getVolume());
-    }
-
-    @Override
-    public void onChangePitch(SoundSource source) {
-        if (this.allocatedSources.contains(source))
-            AL11.alSourcef(source.getBackendHandle(), AL11.AL_PITCH, source.getPitch());
-    }
-
-    @Override
-    public void onChangeLooping(SoundSource source) {
-        if (this.allocatedSources.contains(source))
-            AL11.alSourcei(source.getBackendHandle(), AL11.AL_LOOPING, source.isLooping() ? AL11.AL_TRUE : AL11.AL_FALSE);
     }
 
     private void allocateBuffer(SoundBuffer buffer) {
@@ -155,11 +171,20 @@ public class ALBackend implements Backend {
             onCloseBuffer(buffer);
 
         for (SoundSource source : Overtone.getSources()) {
-            if (source.getState() == SoundState.Playing)
-                source.setBackendSampleOffset(AL11.alGetSourcei(source.getBackendHandle(), AL11.AL_SAMPLE_OFFSET));
+            //Сохранение позиции воспроизведения
+            if (source.getState() == SoundState.Playing) {
+                int handle = source.getBackendHandle();
+
+                if (handle == -1)
+                    System.err.println("Synchronization error: source is playing but is not allocated!");
+                else
+                    source.setBackendSampleOffset(AL11.alGetSourcei(source.getBackendHandle(), AL11.AL_SAMPLE_OFFSET));
+            }
 
             onCloseSource(source);
         }
+
+        MemoryUtil.memFree(this.sourceRotationCacheBuffer);
 
         this.sourcePool.close();
         ALC11.alcMakeContextCurrent(MemoryUtil.NULL);

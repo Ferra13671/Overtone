@@ -14,12 +14,6 @@ public interface Backend {
 
     void onChangeBuffer(SoundSource source);
 
-    void onChangeVolume(SoundSource source);
-
-    void onChangePitch(SoundSource source);
-
-    void onChangeLooping(SoundSource source);
-
     void onCloseBuffer(SoundBuffer buffer);
 
     void onCloseSource(SoundSource source);
