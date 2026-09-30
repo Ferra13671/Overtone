@@ -50,17 +50,15 @@ public class Overtone {
     }
 
     private void recreateDevice() {
-        ALDevice prevDevice = device;
-        Backend prevBackend = backend;
-        device = null;
-        backend = null;
-        synchronized (prevDevice) {
-            synchronized (prevBackend) {
-                prevBackend.close();
-                prevDevice.close();
-                device = new ALDevice(null);
-                backend = new ALBackend(device);
-            }
+        try {
+            ALDevice newDevice = new ALDevice(null);
+
+            device.close();
+            backend.close();
+            device = newDevice;
+            backend = new ALBackend(newDevice);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

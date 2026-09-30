@@ -19,7 +19,7 @@ public class SourcePool {
             throw new IllegalStateException("Size must be >= 0");
 
         for (int i = 0; i < size; i++)
-            this.free.add(AL11.alGenSources());
+            this.free.add(createSource());
     }
 
     public int acquire() {
@@ -29,9 +29,8 @@ public class SourcePool {
         Integer handle = this.free.pollFirst();
 
         if (handle == null) {
-            handle = AL11.alGenSources();
-            if (handle == 0)
-                throw new IllegalStateException("Failed allocate source");
+            handle = createSource();
+
             this.overflow.add(handle);
         }
 
@@ -52,12 +51,19 @@ public class SourcePool {
         this.free.addLast(handle);
     }
 
+    private int createSource() {
+        int handle = AL11.alGenSources();
+        if (handle == 0)
+            throw new IllegalStateException("Failed create OpenAL source");
+
+        return handle;
+    }
+
     public void close() {
         if (this.closed)
             return;
 
 
-        System.out.println("Closed source pool");
         this.free.forEach(AL11::alDeleteSources);
         this.inUse.forEach(AL11::alDeleteSources);
         this.overflow.forEach(AL11::alDeleteSources);

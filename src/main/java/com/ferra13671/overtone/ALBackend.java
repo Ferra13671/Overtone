@@ -98,8 +98,10 @@ public final class ALBackend implements Backend {
         allocateBuffer(source.getSoundBuffer());
 
         AL11.alSourcei(handle, AL11.AL_BUFFER, source.getSoundBuffer().getBackendHandle());
-        if (source.getBackendSampleOffset() != 0)
+        if (source.getBackendSampleOffset() != 0) {
             AL11.alSourcei(handle, AL11.AL_SAMPLE_OFFSET, source.getBackendSampleOffset());
+            source.setBackendSampleOffset(0);
+        }
         applySourceState(source);
 
         source.setState(SoundState.Playing);
@@ -109,6 +111,7 @@ public final class ALBackend implements Backend {
     @Override
     public void pauseSource(SoundSource source) {
         source.setState(SoundState.Paused);
+        source.setBackendSampleOffset(AL11.alGetSourcei(source.getBackendHandle(), AL11.AL_SAMPLE_OFFSET));
         onCloseSource(source);
     }
 

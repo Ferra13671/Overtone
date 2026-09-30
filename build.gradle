@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.ferra13671'
-version = '1.0'
+version = '1.1'
 
 def osName = providers.systemProperty("os.name").get().toLowerCase()
 def osArch = providers.systemProperty("os.arch").get().toLowerCase()

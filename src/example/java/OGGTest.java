@@ -12,7 +12,7 @@ public class OGGTest {
 
             try(SoundSource source = Overtone.create2DSource()) {
                 source.setSoundBuffer(buffer);
-                source.setVolume(0.1f);
+                source.setVolume(1f);
                 source.setLooping(true);
                 source.play();
 
