@@ -29,7 +29,6 @@ public class Overtone {
 
     @Getter(AccessLevel.PACKAGE)
     private AudioEngine engine;
-    private boolean closed = false;
 
     public void init() {
         init(new AudioEngineImpl());
@@ -108,13 +107,13 @@ public class Overtone {
     }
 
     public void close() {
-        if (closed)
+        if (engine == null)
             return;
 
         buffers.forEach(SoundBuffer::close);
         sources.forEach(SoundSource::close);
 
         engine.close();
-        closed = true;
+        engine = null;
     }
 }
