@@ -4,10 +4,10 @@ import com.ferra13671.overtone.decoder.Decoder;
 import com.ferra13671.overtone.decoder.DecodedAudio;
 import com.ferra13671.overtone.decoder.OGGDecoder;
 import com.ferra13671.overtone.decoder.WAVDecoder;
+import com.ferra13671.overtone.engine.AudioEngineImpl;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import org.lwjgl.openal.ALC11;
-import org.lwjgl.openal.EXTDisconnect;
 
 import java.io.InputStream;
 import java.nio.ShortBuffer;
@@ -27,41 +27,23 @@ public class Overtone {
     @Getter
     private final Listener listener = new Listener();
 
-    private volatile ALDevice device;
-    @Getter
-    private volatile Backend backend;
+    @Getter(AccessLevel.PACKAGE)
+    private AudioEngine engine;
+    private boolean closed = false;
 
     public void init() {
-        if (backend != null)
+        init(new AudioEngineImpl());
+    }
+
+    public void init(AudioEngine audioEngine) {
+        if (engine != null)
             throw new IllegalStateException("Overtone already initialized");
 
-        device = new ALDevice(null);
-        backend = new ALBackend(device);
+        engine = audioEngine;
     }
 
     public void tick() {
-        if (isDeviceLost())
-            recreateDevice();
-
-        if (backend != null)
-            backend.tick();
-    }
-
-    private boolean isDeviceLost() {
-        return device.getCapabilities().ALC_EXT_disconnect && ALC11.alcGetInteger(device.getHandle(), EXTDisconnect.ALC_CONNECTED) == ALC11.ALC_FALSE;
-    }
-
-    private void recreateDevice() {
-        try {
-            ALDevice newDevice = new ALDevice(null);
-
-            device.close();
-            backend.close();
-            device = newDevice;
-            backend = new ALBackend(newDevice);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        engine.tick();
     }
 
     public List<SoundBuffer> getBuffers() {
@@ -112,7 +94,7 @@ public class Overtone {
 
     void closeBuffer(SoundBuffer soundBuffer) {
         if (buffers.contains(soundBuffer)) {
-            backend.onCloseBuffer(soundBuffer);
+            engine.onCloseBuffer(soundBuffer);
             buffers.remove(soundBuffer);
         }
     }
@@ -120,21 +102,19 @@ public class Overtone {
     void closeSource(SoundSource soundSource) {
         if (sources.contains(soundSource)) {
             soundSource.setState(SoundState.Stopped);
-            backend.onCloseSource(soundSource);
+            engine.onCloseSource(soundSource);
             sources.remove(soundSource);
         }
     }
 
     public void close() {
-        if (backend == null)
+        if (closed)
             return;
 
         buffers.forEach(SoundBuffer::close);
         sources.forEach(SoundSource::close);
 
-        backend.close();
-        backend = null;
-        device.close();
-        device = null;
+        engine.close();
+        closed = true;
     }
 }

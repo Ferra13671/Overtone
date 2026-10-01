@@ -1,6 +1,6 @@
 package com.ferra13671.overtone;
 
-public interface Backend {
+public interface AudioEngine {
 
     void tick();
 

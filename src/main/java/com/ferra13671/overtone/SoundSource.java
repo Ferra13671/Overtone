@@ -29,26 +29,26 @@ public sealed class SoundSource implements AutoCloseable
     SoundSource() {}
 
     public void play() {
-        Overtone.getBackend().playSource(this);
+        Overtone.getEngine().playSource(this);
     }
 
     public void pause() {
-        Overtone.getBackend().pauseSource(this);
+        Overtone.getEngine().pauseSource(this);
     }
 
     public void stop() {
-        Overtone.getBackend().stopSource(this);
+        Overtone.getEngine().stopSource(this);
     }
 
     public void rewind() {
-        Overtone.getBackend().rewindSource(this);
+        Overtone.getEngine().rewindSource(this);
     }
 
     public void setSoundBuffer(SoundBuffer soundBuffer) {
         if (!Objects.equals(this.soundBuffer, soundBuffer)) {
             this.soundBuffer = soundBuffer;
 
-            Overtone.getBackend().onChangeBuffer(this);
+            Overtone.getEngine().onChangeBuffer(this);
         }
     }
 

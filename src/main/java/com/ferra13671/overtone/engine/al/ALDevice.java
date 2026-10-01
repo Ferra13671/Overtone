@@ -1,4 +1,4 @@
-package com.ferra13671.overtone;
+package com.ferra13671.overtone.engine.al;
 
 import lombok.Getter;
 import org.lwjgl.openal.ALC;
