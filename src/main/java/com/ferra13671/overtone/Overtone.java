@@ -24,6 +24,8 @@ public class Overtone {
 
     private final List<SoundBuffer> buffers = new CopyOnWriteArrayList<>();
     private final List<SoundSource> sources = new CopyOnWriteArrayList<>();
+    @Getter
+    private final Listener listener = new Listener();
 
     private volatile ALDevice device;
     @Getter

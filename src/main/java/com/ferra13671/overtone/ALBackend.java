@@ -53,6 +53,10 @@ public final class ALBackend implements Backend {
             if (AL11.alGetSourcei(source.getBackendHandle(), AL11.AL_SOURCE_STATE) != AL11.AL_PLAYING)
                 stopSource(source);
         }
+
+        Listener listener = Overtone.getListener();
+        if (listener.isDirty())
+            applyListenerState(listener);
     }
 
     private void applySourceState(SoundSource source) {
@@ -80,6 +84,18 @@ public final class ALBackend implements Backend {
         }
 
         source.setDirty(false);
+    }
+
+    private void applyListenerState(Listener listener) {
+        Vector3fc position = listener.getPosition();
+        Vector3fc lookVector = listener.getLookVector();
+        Vector3fc upVector = listener.getUpVector();
+
+        AL11.alListener3f(AL11.AL_POSITION, position.x(), position.y(), position.z());
+        this.sourceRotationCacheBuffer
+                .put(0, lookVector.x()).put(1, lookVector.y()).put(2, lookVector.z())
+                .put(3, upVector.x()).put(4, upVector.y()).put(5, upVector.z());
+        AL11.alListenerfv(AL11.AL_ORIENTATION, this.sourceRotationCacheBuffer);
     }
 
     @Override

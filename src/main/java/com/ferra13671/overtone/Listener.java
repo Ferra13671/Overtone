@@ -1,9 +1,12 @@
 package com.ferra13671.overtone;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-public final class SpatialSoundSource extends SoundSource implements Spatial {
+public class Listener implements Spatial {
     private final Vector3f position = new Vector3f();
     //x — yaw, y — elevation, z — roll
     private final Vector3f rotation = new Vector3f();
@@ -11,7 +14,11 @@ public final class SpatialSoundSource extends SoundSource implements Spatial {
     private final Vector3f lookVector = new Vector3f(0f, 0f, -1f);
     private final Vector3f upVector = new Vector3f(0f, 1f, 0f);
 
-    SpatialSoundSource() {}
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    private boolean dirty = true;
+
+    Listener() {}
 
     @Override
     public Vector3fc getPosition() {
